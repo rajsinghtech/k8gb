@@ -22,6 +22,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/k8gb-io/k8gb/controllers/zones"
+
 	k8gbiov1beta1 "github.com/k8gb-io/k8gb/api/k8gb.io/v1beta1"
 	k8gbv1beta1 "github.com/k8gb-io/k8gb/api/v1beta1"
 	"github.com/k8gb-io/k8gb/controllers"
@@ -152,13 +154,14 @@ func run() error {
 		log.Err(err).Msg("Unable to create DNS provider factory")
 		return err
 	}
-
+	zoneService := zones.NewZoneService(config, mgr.GetClient(), mgr.GetAPIReader())
 	gslbReconciler := &controllers.GslbReconciler{
 		Config:             config,
 		Client:             mgr.GetClient(),
 		Resolver:           r,
 		Scheme:             mgr.GetScheme(),
 		GslbIngressHandler: controllers.NewIngressHandler(context.TODO(), mgr.GetClient(), mgr.GetScheme()),
+		ZoneService:        zoneService,
 	}
 
 	corednsReconciler := &controllers.CoreDNSReconciler{
@@ -167,6 +170,7 @@ func run() error {
 		Scheme:      mgr.GetScheme(),
 		DNSProvider: f.Provider(),
 		Bootstrap:   bootstrap,
+		ZoneService: zoneService,
 	}
 
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
