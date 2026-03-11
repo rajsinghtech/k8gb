@@ -173,6 +173,15 @@ func run() error {
 		ZoneService: zoneService,
 	}
 
+	zoneDelegationReconciler := &controllers.ZoneDelegationReconciler{
+		Config:      config,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		DNSProvider: f.Provider(),
+		Bootstrap:   bootstrap,
+		ZoneService: zoneService,
+	}
+
 	if err = gslbReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create Gslb reconciler")
 		return err
@@ -180,6 +189,11 @@ func run() error {
 
 	if err = corednsReconciler.SetupWithManager(mgr); err != nil {
 		log.Err(err).Msg("Unable to create coreDNS reconciler")
+		return err
+	}
+
+	if err = zoneDelegationReconciler.SetupWithManager(mgr); err != nil {
+		log.Err(err).Msg("Unable to create Zone Delegation reconciler")
 		return err
 	}
 
