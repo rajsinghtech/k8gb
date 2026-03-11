@@ -98,7 +98,8 @@ jobs:
           kubectl get no -owide --context=k3d-test-gslb1
           echo "Cluster 2 (us):"
           kubectl get no -owide --context=k3d-test-gslb2
-          kubectl get crd
+          kubectl logs -l name=k8gb -n k8gb --context=k3d-test-gslb1
+          kubectl logs -l name=k8gb -n k8gb --context=k3d-test-gslb2
 
       - name: Run Terratest
         run: |
